@@ -48,7 +48,7 @@ In order to run your computation, instantiate a `TuringMachine` by passing it fo
     - `new_state`, the new state that should replace `current_state`, must be either `int` or `str`; in order to signal to the machine that it should stop the execution, `new_state` must be equal to `"stop"`
 2. `initial_tape`: a `list` defining the initial tape; must only contain one of the three allows symbols, i.e. `0`, `1` or `" "`.
 3. `initial_state`: the initial machine state, must be either `int` or `str`
-4. `initial_cursor`: the initial position of the cursor; must be an `int` such that `o <= initial_cursor <= len(initial_tape)`.
+4. `initial_cursor`: the initial position of the cursor with respect to `initial_tape`; must be an `int` such that `o <= initial_cursor <= len(initial_tape)`.
 
 ## Examples
 
