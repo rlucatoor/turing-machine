@@ -44,38 +44,47 @@ In order to run your computation, instantiate a `TuringMachine` by passing it fo
     - `current_state`: the machine state that needs to be present for this instruction to be executed, must be either `int` or `str`
     - `current_symbol`: the symbol that needs to be selected for this instruction to be executed, must be one of `0`, `1` and `" "`
     - `write_instruction`: the new symbol that should replace `current_symbol`, must be one of `0`, `1` and `" "`
-    - `move_instruction`: the direction in which the tape should be moved; should be `"L"` for 'left' and `"R"` from 'right'.
-    - `new_state`, the new state that should replace `current_state`, must be either `int` or `str`.
+    - `move_instruction`: the direction in which the tape should be moved; should be `"L"` for 'left' and `"R"` from 'right' (or `" "` for neither, exclusively used in conjunction with `new_state = "stop"`)
+    - `new_state`, the new state that should replace `current_state`, must be either `int` or `str`; in order to signal to the machine that it should stop the execution, `new_state` must be equal to `"stop"`
 2. `initial_tape`: a `list` defining the initial tape; must only contain one of the three allows symbols, i.e. `0`, `1` or `" "`.
 3. `initial_state`: the initial machine state, must be either `int` or `str`
 4. `initial_cursor`: the initial position of the cursor; must be an `int` such that `o <= initial_cursor <= len(initial_tape)`.
 
 ## Example
 
+Let us implement the simple bit-inverter machine [described here](https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/turing-machine/one.html). Such machine will do the following:
+- takes in a list of bits `[1, 1, 0]` 
+- starting from the last bit `0`, inverts each bit
+- returns the inverse list `[0, 0, 1]`. 
+
+This can be done by passing the following `instructions_table`
+
     instructions_table = [ 
-        [ 0, ' ', ' ', 'L', 1 ],
-        [ 0, 0, 1, 'R', 1 ],
-        [ 0, 1, 0, 'R', 0 ],
-        [ 1, ' ', ' ', 'R', 'stop' ],
-        [ 1, 0, 1, 'L', 1 ],
-        [ 1, 1, 0, 'L', 1 ]
+        [ 0, ' ', ' ', ' ', 'stop' ],
+        [ 0, 0, 1, 'R', 0 ],
+        [ 0, 1, 0, 'R', 0 ]
     ]
-    initial_tape = [ ' ', 0, 0, 1 ]
-    intial_state = 0
-    initial_cursor = 0
 
-    t = TuringMachine(instructions_table, initial_tape, intial_state, initial_cursor)
-    final_tape = t()
-    
-    # outputs [0, 0, 1]
-
-The `instructions_table` defined above resolves to the following instructions:
+Which resolves to the following instructions:
 
 | current_state | current_symbol | write_instruction | move_instruction | new_state |
 | ------------- | -------------- | ----------------- | ---------------- | --------- |
-| 0             | " "            | " "               | left             | 1         |
-| 0             | 0              | 1                 | right            | 1         |
+| 0             | " "            | " "               | " "              | "stop"          |
+| 0             | 0              | 1                 | right            | 0         |
 | 0             | 1              | 0                 | right            | 0         |
-| 1             | " "            | " "               | right            | "stop"    |
-| 1             | 0              | 1                 | left             | 1         |
-| 1             | 1              | 0                 | left             | 1         |
+
+Let us then define the initial tape `[1, 1, 0]`, the initial state `0` and the initial cursor position `2` (meaning on the last bit `0`).
+
+    tape = [ 1, 1, 0 ]
+    state = 0
+    cursor = 2
+
+Let us then instantiate the `TuringMachine` by passing it the parameters above and call it
+
+    t = TuringMachine(instructions_table, tape, state, cursor)
+    final_tape = t()
+    assert final_tape == [ 0, 0, 1 ]
+    
+    # outputs [0, 0, 1]
+
+This will output `[0, 0, 1]`, which is the correctly inverted list of bits.
