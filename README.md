@@ -50,20 +50,25 @@ In order to run your computation, instantiate a `TuringMachine` by passing it fo
 3. `initial_state`: the initial machine state, must be either `int` or `str`
 4. `initial_cursor`: the initial position of the cursor; must be an `int` such that `o <= initial_cursor <= len(initial_tape)`.
 
-## Example
+## Examples
 
-Let us implement the simple bit-inverter machine [described here](https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/turing-machine/one.html). Such machine will do the following:
+### Example 1: single-state machine
+
+Following the example [described at this link](https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/turing-machine/one.html#one-three), let us implement a simple, single-state bit-inverter machine. The bit-inverter will do the following:
 - takes in a list of bits `[1, 1, 0]` 
-- starting from the last bit `0`, inverts each bit
+- starting from the last bit `0`, and moving backwards, inverts each bit
 - returns the inverse list `[0, 0, 1]`. 
 
 This can be done by passing the following `instructions_table`
 
-    instructions_table = [ 
-        [ 0, ' ', ' ', ' ', 'stop' ],
-        [ 0, 0, 1, 'R', 0 ],
-        [ 0, 1, 0, 'R', 0 ]
-    ]
+```Python
+
+instructions_table = [ 
+    [ 0, ' ', ' ', ' ', 'stop' ],
+    [ 0, 0, 1, 'R', 0 ],
+    [ 0, 1, 0, 'R', 0 ]
+]
+```
 
 Which resolves to the following instructions:
 
@@ -75,16 +80,70 @@ Which resolves to the following instructions:
 
 Let us then define the initial tape `[1, 1, 0]`, the initial state `0` and the initial cursor position `2` (meaning on the last bit `0`).
 
-    tape = [ 1, 1, 0 ]
-    state = 0
-    cursor = 2
+```Python
+tape = [ 1, 1, 0 ]
+state = 0
+cursor = 2
+```
 
 Let us then instantiate the `TuringMachine` by passing it the parameters above and call it
 
-    t = TuringMachine(instructions_table, tape, state, cursor)
-    final_tape = t()
-    assert final_tape == [ 0, 0, 1 ]
-    
-    # outputs [0, 0, 1]
+```Python
+t = TuringMachine(instructions_table, tape, state, cursor)
+final_tape = t()
+
+# >>> outputs [0, 0, 1]
+```
 
 This will output `[0, 0, 1]`, which is the correctly inverted list of bits.
+
+### Example 2: finite-state
+
+Following the example [desribed here](https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/turing-machine/one.html#one-six), let us implement a bit more convoluted, two-states bit-array inverter. The bit-inverter will do the following:
+- takes in a list of bits preceded by a blank symbol: `[" ", 0, 0, 1]` 
+- starting from the blank symbol and moving forward, inverts each bit
+- returns the inverse list `[1, 1, 0]` (in which the initial blank symbol has been ignored). 
+
+This can be done by passing a slightly more complicated `instructions_table`
+
+```Python
+
+instructions_table_2 = [ 
+    [ 0, ' ', ' ', 'L', 1 ],
+    [ 0, 0, 1, 'R', 1 ],
+    [ 0, 1, 0, 'R', 0 ],
+    [ 1, ' ', ' ', 'R', 'stop' ],
+    [ 1, 0, 1, 'L', 1 ],
+    [ 1, 1, 0, 'L', 1 ]
+]
+```
+
+Which resolves to the following instructions:
+
+| current_state | current_symbol | write_instruction | move_instruction | new_state |
+| ------------- | -------------- | ----------------- | ---------------- | --------- |
+| 0             | " "            | " "               | left             | 1         |
+| 0             | 0              | 1                 | right            | 1         |
+| 0             | 1              | 0                 | right            | 0         |
+| 1             | " "            | " "               | right            | "stop"    |
+| 1             | 0              | 1                 | left             | 1         |
+| 1             | 1              | 0                 | left             | 1         |
+
+Let us then define the initial tape `[" ", 0, 0, 1]`, as well as the initial state `0` and the initial cursor position `0` (meaning on the blank character `" "`).
+
+```Python
+tape = [ " ", 0, 0, 1 ]
+state = 0
+cursor = 0
+```
+
+Let us then instantiate the `TuringMachine` by passing it the parameters above and call it
+
+```Python
+t = TuringMachine(instructions_table, tape, state, cursor)
+final_tape = t()
+
+# >>> outputs [1, 1, 0]
+```
+
+This will output `[1, 1, 0]`, which is the correctly inverted list of bits.
